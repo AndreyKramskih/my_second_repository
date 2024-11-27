@@ -1,36 +1,33 @@
 import logging
-import sys
 
-# Определяем первый вид форматирования
-format_1 = '#%(levelname)-8s [%(asctime)s] - %(filename)s:'\
-           '%(lineno)d - %(name)s - %(message)s'
-# Определяем второй вид форматирования
-format_2 = '[{asctime}] #{levelname:8} {filename}:'\
-           '{lineno} - {name} - {message}'
+# Определяем свой фильтр, наследуюясь от класса Filter библиотеки logging
+class ErrorLogFilter(logging.Filter):
+    # Переопределяем метод filter, который принимает `self` и `record`
+    # Переменная рекорд будет ссылаться на объект класса LogRecord
+    def filter(self, record):
+        return record.levelname == 'ERROR' and 'важно' in record.msg.lower()
 
-# Инициализируем первый форматтер
-format_1=logging.Formatter(fmt=format_1)
-# Инициализируем второй форматтер
-format_2=logging.Formatter(fmt=format_2, style='{')
-
-# Создаем логгер
+# Инициализируем логгер
 logger=logging.getLogger(__name__)
 
-# Инициализируем хэндлер, который будет перенаправлять логи в stderr
+# Создаем хэндлер, который будет направлять логи в stderr
 stderr_handler=logging.StreamHandler()
-# Инициализируем хэндлер, который будет перенаправлять логи в stdout
-stdout_handler=logging.StreamHandler(sys.stdout)
 
-# Устанавливаем форматтеры для хэндлеров
-stderr_handler.setFormatter(format_1)
-stdout_handler.setFormatter(format_1)
+# Подключаем фильтр к хэндлеру
+stderr_handler.addFilter(ErrorLogFilter())
 
-# Добавляем хэндлеры логгеру
+# Подключаем хэндлер к логгеру
 logger.addHandler(stderr_handler)
-logger.addHandler(stdout_handler)
 
-# Создаем лог
-logger.warning('Это лог с предупреждением')
+logger.warning('Важно! Это лог с предупреждением!')
+logger.error('Важно! Это лог с ошибкой!')
+logger.info('Важно! Это лог с уровня INFO!')
+logger.error('Это лог с ошибкой!')
+
+
+
+
+
 
 
 
