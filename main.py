@@ -18,18 +18,17 @@ dp=Dispatcher()
 kp_builder=ReplyKeyboardBuilder()
 
 # ССоздаем первый список с кнопками
-buttons_1: list[KeyboardButton]=[KeyboardButton(text=f'Кнопка {i+1}') for i in range(8)]
-# ССоздаем второй список с кнопками
-buttons_2:list[KeyboardButton]=[KeyboardButton(text=f'Кнопка {i+6}') for i in range(10)]
+buttons_1: list[KeyboardButton]=[KeyboardButton(text=f'Кнопка {i+1}') for i in range(10)]
 
 
-#Методами билдера добавляем в него кнопки (возьмем для примера метод row())
-# в зависимости от параметра width - желаемого количества кнопок в ряду.
-# "Лишние" кнопки переносятся на следующий ряд.
-kp_builder.row(*buttons_1, width=4)
+#Распаковываем список с кнопками методом add
+kp_builder.add(*buttons_1)
 
-# # Распаковываем второй список с кнопками методом add
-kp_builder.add(*buttons_2)
+
+# Явно сообщаем билдеру сколько хотим видеть кнопок в 1-м и 2-м рядах,
+# а также говорим методу повторять такое размещение для остальных рядов
+kp_builder.adjust(1, 2, repeat=True)
+
 
 # Методом as_markup() передаем клавиатуру как аргумент туда, где она требуется
 
