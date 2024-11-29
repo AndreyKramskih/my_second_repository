@@ -1,62 +1,59 @@
-from aiogram import Bot, Dispatcher, F
-from aiogram.filters import CommandStart
-from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup,ReplyKeyboardRemove
-
-# Импортируем ReplyKeyboardBuilder из aiogram.utils.keyboard
+from aiogram import Dispatcher, Bot
+from aiogram.filters import CommandStart, Command
+from aiogram.types import Message
+from aiogram.types import KeyboardButton, KeyboardButtonPollType, ReplyKeyboardMarkup
+from aiogram.types.web_app_info import WebAppInfo
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from numpy.ma.core import resize
 
-# Вместо BOT TOKEN HERE нужно вставить токен вашего бота,
-# полученный у @BotFather
 BOT_TOKEN='7656570135:AAHAU-5sKUFNc5UfgpBqEd4fxrKQWcQpoeU'
-
-# Создаем объекты бота и диспетчера
 bot=Bot(BOT_TOKEN)
 dp=Dispatcher()
-
-# Инициализируем объект билдера
 kp_builder=ReplyKeyboardBuilder()
 
-# ССоздаем первый список с кнопками
-buttons_1: list[KeyboardButton]=[KeyboardButton(text=f'Кнопка {i+1}') for i in range(10)]
+# Создаем кнопки
+contact_btn=KeyboardButton(
+    text='Отправить телефон',
+    request_contact=True
+)
+geo_btn=KeyboardButton(
+    text='Отправить геолокацию',
+    request_location=True
+)
+poll_btn=KeyboardButton(
+    text='Созадать опрос/викторину',
+    request_poll=KeyboardButtonPollType()
+)
+web_app_btn=KeyboardButton(
+    text='Start Wep App',
+    web_app=WebAppInfo(url='https://www.vseinstrumenti.ru/')
+)
+# Добавляем кнопки в билдер
+kp_builder.row(contact_btn, geo_btn, poll_btn, web_app_btn,  width=1)
 
+# Создаем объект клавиатуры
+keyboard:ReplyKeyboardMarkup=kp_builder.as_markup(
+    resize_keyboard=True,
+    one_time_keyboard=True
+)
 
-#Распаковываем список с кнопками методом add
-kp_builder.add(*buttons_1)
-
-
-# Явно сообщаем билдеру сколько хотим видеть кнопок в 1-м и 2-м рядах,
-# а также говорим методу повторять такое размещение для остальных рядов
-kp_builder.adjust(1, 2, repeat=True)
-
-
-# Методом as_markup() передаем клавиатуру как аргумент туда, где она требуется
 
 # Этот хэндлер будет срабатывать на команду "/start"
-# и отправлять в чат клавиатуру
 @dp.message(CommandStart())
 async def process_start_command(message:Message):
-    await message.answer(text='Чего кошки бояться больше?',
-                         reply_markup=kp_builder.as_markup(resize_keyborad=True)
-                         )
-
-# Этот хэндлер будет срабатывать на ответ "Собак 🦮" и удалять клавиатуру
-@dp.message(F.text=='Кнопка 1')
-async def process_dog_answer(message:Message):
     await message.answer(
-                         text='Да, несомненно, кошки боятся собак. '
-                              'Но вы видели как они боятся огурцов?',
-                         reply_markup=ReplyKeyboardRemove()
-                         )
+        text='Экспериментируем с кнопками',
+        reply_markup=keyboard
+    )
 
-# Этот хэндлер будет срабатывать на ответ "Огурцов 🥒" и удалять клавиатуру
-@dp.message(F.text=='Кнопка 2')
-async def process_cucumber_answer(message:Message):
+# Этот хэндлер будет срабатывать на команду "/web_app"
+@dp.message(Command(commands='web_app'))
+async def process_web_app_command(message:Message):
     await message.answer(
-                         text='Да, иногда кажется, что огурцов '
-                          'кошки боятся больше',
-                          reply_markup=ReplyKeyboardRemove()
-                         )
+        text='Идем в Систерм',
+        reply_markup=keyboard
+    )
+
+
 
 if __name__== '__main__':
     dp.run_polling(bot)
