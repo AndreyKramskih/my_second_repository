@@ -1,64 +1,45 @@
-from aiogram import Dispatcher, Bot
-from aiogram.filters import CommandStart, Command
-from aiogram.types import Message
-from aiogram.types import KeyboardButton, KeyboardButtonPollType, ReplyKeyboardMarkup
-from aiogram.types.web_app_info import WebAppInfo
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from mailbox import Message
+
+from aiogram import Bot, Dispatcher
+from aiogram.types import BotCommand, Message
+from aiogram.filters import Command
 
 BOT_TOKEN='7656570135:AAHAU-5sKUFNc5UfgpBqEd4fxrKQWcQpoeU'
-bot=Bot(BOT_TOKEN)
-dp=Dispatcher()
-kp_builder=ReplyKeyboardBuilder()
 
-# Создаем кнопки
-contact_btn=KeyboardButton(
-    text='Отправить телефон',
-    request_contact=True
-)
-geo_btn=KeyboardButton(
-    text='Отправить геолокацию',
-    request_location=True
-)
-poll_btn=KeyboardButton(
-    text='Созадать опрос/викторину',
-    request_poll=KeyboardButtonPollType()
-)
-web_app_btn=KeyboardButton(
-    text='Start Wep App',
-    web_app=WebAppInfo(url='https://www.vseinstrumenti.ru/')
-)
-# Добавляем кнопки в билдер
-kp_builder.row(contact_btn, geo_btn, poll_btn, web_app_btn,  width=1)
-
-# Создаем объект клавиатуры
-keyboard:ReplyKeyboardMarkup=kp_builder.as_markup(
-    resize_keyboard=True,
-    one_time_keyboard=True
-)
+# Создаем объекты бота и диспетчера
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
 
 
-# Этот хэндлер будет срабатывать на команду "/start"
-@dp.message(CommandStart())
-async def process_start_command(message:Message):
-    await message.answer(
-        text='Экспериментируем с кнопками',
-        reply_markup=keyboard
-    )
+# Создаем асинхронную функцию
+async def set_main_menu(bot: Bot):
 
-# Этот хэндлер будет срабатывать на команду "/web_app"
-@dp.message(Command(commands='web_app'))
-async def process_web_app_command(message:Message):
-    await message.answer(
-        text='Идем в Систерм',
-        reply_markup=keyboard
-    )
+    # Создаем список с командами и их описанием для кнопки menu
+    main_menu_commands = [
+        BotCommand(command='/help',
+                   description='Справка по работе бота'),
+        BotCommand(command='/support',
+                   description='Поддержка'),
+        BotCommand(command='/contacts',
+                   description='Другие способы связи'),
+        BotCommand(command='/payments',
+                   description='Платежи')
+    ]
 
+    await bot.set_my_commands(main_menu_commands)
 
+# Этот хэндлер будет срабатывать на команду "/delmenu"
+# и удалять кнопку Menu c командами
+@dp.message(Command(commands='delmenu'))
+async def del_main_menu(message:Message):
+    await bot.delete_my_commands()
+    await message.answer(text='Кнопка "menu" удалена')
 
-if __name__== '__main__':
-    dp.run_polling(bot)
-
-
+# Регистрируем асинхронную функцию в диспетчере,
+# которая будет выполняться на старте бота,
+dp.startup.register(set_main_menu)
+# Запускаем поллинг
+dp.run_polling(bot)
 
 
 
