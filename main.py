@@ -1,8 +1,8 @@
-from mailbox import Message
+
 
 from aiogram import Bot, Dispatcher
-from aiogram.types import BotCommand, Message
-from aiogram.filters import Command
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
+from aiogram.filters import CommandStart
 
 BOT_TOKEN='7656570135:AAHAU-5sKUFNc5UfgpBqEd4fxrKQWcQpoeU'
 
@@ -10,40 +10,32 @@ BOT_TOKEN='7656570135:AAHAU-5sKUFNc5UfgpBqEd4fxrKQWcQpoeU'
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+# Создаем объекты инлайн-кнопок
+url_button_1=InlineKeyboardButton(
+    text='Курс "Телеграм-боты на Python и AIOgram"',
+    url='https://stepik.org/120924'
+)
+url_button_2=InlineKeyboardButton(
+    text='Документация Telegram Bot API',
+    url='https://core.telegram.org/bots/api'
+)
 
-# Создаем асинхронную функцию
-async def set_main_menu(bot: Bot):
+# Создаем объект инлайн-клавиатуры
+keyboard=InlineKeyboardMarkup(
+    inline_keyboard=[[url_button_1],
+                     [url_button_2]]
+)
 
-    # Создаем список с командами и их описанием для кнопки menu
-    main_menu_commands = [
-        BotCommand(command='/help',
-                   description='Справка по работе бота'),
-        BotCommand(command='/support',
-                   description='Поддержка'),
-        BotCommand(command='/contacts',
-                   description='Другие способы связи'),
-        BotCommand(command='/payments',
-                   description='Платежи')
-    ]
+# Этот хэндлер будет срабатывать на команду "/start"
+# и отправлять в чат клавиатуру c url-кнопками
+@dp.message(CommandStart())
+async def process_start_command(message:Message):
+    await message.answer(
+         text='Это инлайн-кнопки с параметром "url"',
+         reply_markup=keyboard
+    )
 
-    await bot.set_my_commands(main_menu_commands)
-
-# Этот хэндлер будет срабатывать на команду "/delmenu"
-# и удалять кнопку Menu c командами
-@dp.message(Command(commands='delmenu'))
-async def del_main_menu(message:Message):
-    await bot.delete_my_commands()
-    await message.answer(text='Кнопка "menu" удалена')
-
-# Регистрируем асинхронную функцию в диспетчере,
-# которая будет выполняться на старте бота,
-dp.startup.register(set_main_menu)
-# Запускаем поллинг
-dp.run_polling(bot)
-
-
-
-
-
+if __name__ == '__main__':
+    dp.run_polling(bot)
 
 
